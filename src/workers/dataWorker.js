@@ -3,44 +3,22 @@
 
 // 常量定义
 const TOTAL_ROWS = 100000;
-const COLUMN_NAMES = [
-  "ID",
-  "Col1",
-  "Col2",
-  "Col3",
-  "Col4",
-  "Col5",
-  "Col6",
-  "Col7",
-  "Col8",
-  "Col9",
-];
-const COLUMN_KEYS = [
-  "id",
-  "Col1",
-  "Col2",
-  "Col3",
-  "Col4",
-  "Col5",
-  "Col6",
-  "Col7",
-  "Col8",
-  "Col9",
-];
+const COLUMN_NAMES = ['ID', 'Col1', 'Col2', 'Col3', 'Col4', 'Col5', 'Col6', 'Col7', 'Col8', 'Col9'];
+const COLUMN_KEYS = ['id', 'Col1', 'Col2', 'Col3', 'Col4', 'Col5', 'Col6', 'Col7', 'Col8', 'Col9'];
 
 // 全局数据存储
 let allData = null;
 let sortedData = null;
 let currentSort = { column: null, direction: null }; // null | 'asc' | 'desc'
-let currentFilter = null; // { column: null, operator: null, value: null }
-let filteredData = null;
+// const currentFilter = null; // { column: null, operator: null, value: null } - 暂时未使用
+// const filteredData = null; // 暂时未使用
 
 /**
  * 生成10万行数据
  * 每行包含ID和9个随机数值列，使用对象数组格式
  */
 function generateData() {
-  console.log("Worker: 开始生成数据...");
+  console.log('Worker: 开始生成数据...');
   const startTime = performance.now();
 
   const data = new Array(TOTAL_ROWS);
@@ -63,9 +41,7 @@ function generateData() {
   }
 
   const endTime = performance.now();
-  console.log(
-    `Worker: 数据生成完成，耗时 ${(endTime - startTime).toFixed(2)}ms`,
-  );
+  console.log(`Worker: 数据生成完成，耗时 ${(endTime - startTime).toFixed(2)}ms`);
 
   return data;
 }
@@ -82,15 +58,13 @@ function sortData(columnIndex, direction) {
     const valA = a[columnKey];
     const valB = b[columnKey];
 
-    if (typeof valA === "number" && typeof valB === "number") {
-      return direction === "asc" ? valA - valB : valB - valA;
+    if (typeof valA === 'number' && typeof valB === 'number') {
+      return direction === 'asc' ? valA - valB : valB - valA;
     }
 
     const strA = String(valA);
     const strB = String(valB);
-    return direction === "asc"
-      ? strA.localeCompare(strB)
-      : strB.localeCompare(strA);
+    return direction === 'asc' ? strA.localeCompare(strB) : strB.localeCompare(strA);
   });
 
   return dataToSort;
@@ -140,7 +114,7 @@ allData = generateData();
 // ==============================
 // 🔥 修复点：消息返回类型严格匹配前端
 // ==============================
-self.addEventListener("message", function (e) {
+self.addEventListener('message', function (e) {
   const { type, payload, requestId } = e.data;
 
   try {
@@ -148,28 +122,28 @@ self.addEventListener("message", function (e) {
     let returnType = type;
 
     switch (type) {
-      case "GET_SLICE":
-        console.log("GET_SLICE");
+      case 'GET_SLICE':
+        console.log('GET_SLICE');
         result = getDataSlice(payload.startIndex, payload.count);
-        returnType = "SLICE"; // ✅ 固定返回
+        returnType = 'SLICE'; // ✅ 固定返回
         break;
 
-      case "SORT":
+      case 'SORT':
         const { columnIndex, direction } = payload;
         sortedData = sortData(columnIndex, direction);
         currentSort = { column: columnIndex, direction };
         result = { success: true };
-        returnType = "SORTED"; // ✅ 固定返回
+        returnType = 'SORTED'; // ✅ 固定返回
         break;
 
-      case "RESET_SORT":
+      case 'RESET_SORT':
         result = resetSort();
-        returnType = "RESET_SORTED"; // ✅ 固定返回
+        returnType = 'RESET_SORTED'; // ✅ 固定返回
         break;
 
-      case "GET_STATUS":
+      case 'GET_STATUS':
         result = getStatus();
-        returnType = "STATUS"; // ✅ 固定返回
+        returnType = 'STATUS'; // ✅ 固定返回
         break;
 
       default:
@@ -184,11 +158,11 @@ self.addEventListener("message", function (e) {
     });
   } catch (error) {
     self.postMessage({
-      type: "ERROR",
+      type: 'ERROR',
       payload: { error: error.message },
       requestId,
     });
   }
 });
 
-self.postMessage({ type: "READY", payload: { message: "Worker 已就绪" } });
+self.postMessage({ type: 'READY', payload: { message: 'Worker 已就绪' } });

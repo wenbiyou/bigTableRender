@@ -1,117 +1,23 @@
-# ========== 构建产物 ==========
-dist/
-build/
-out/
-.next/
-.nuxt/
-.output/
+# 构建输出
+dist
+node_modules
 
-# ========== 依赖目录 ==========
-node_modules/
-.yarn/
-.pnpm/
+# 配置文件
+*.cjs
+*.config.js
 
-# ========== 缓存文件 ==========
-.cache/
-.temp/
-.tmp/
+# Git
+.git
 
-# ========== 配置文件 ==========
-.prettierrc.js
-.commitlintrc.js
-.husky/
+# IDE
+.vscode
+.idea
 
-# ========== 日志文件 ==========
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-lerna-debug.log*
-
-# ========== 运行时文件 ==========
+# 系统文件
 .DS_Store
 Thumbs.db
 
-# ========== 环境配置 ==========
-.env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
-
-# ========== 版本控制 ==========
-.git/
-.svn/
-.hg/
-
-# ========== 编辑器配置 ==========
-.vscode/
-.idea/
-*.swp
-*.swo
-
-# ========== 操作系统文件 ==========
-*.pid
-*.seed
-*.pid.lock
-
-# ========== 覆盖率报告 ==========
-coverage/
-.nyc_output/
-
-# ========== 包管理器 ==========
-package-lock.json
-yarn.lock
-pnpm-lock.yaml
-shrinkwrap.yaml
-
-# ========== 安全文件 ==========
-*.pem
-*.key
-*.crt
-
-# ========== 图片和字体 ==========
-*.png
-*.jpg
-*.jpeg
-*.gif
-*.svg
-*.ico
-*.woff
-*.woff2
-*.ttf
-*.eot
-
-# ========== 视频和音频 ==========
-*.mp4
-*.mp3
-*.wav
-*.ogg
-
-# ========== 压缩文件 ==========
-*.zip
-*.tar
-*.gz
-*.7z
-
-# ========== 可执行文件 ==========
-*.exe
-*.dll
-*.so
-*.dylib
-
-# ========== 数据库文件 ==========
-*.db
-*.sqlite
-*.sqlite3
-
-# ========== 文档文件 ==========
-CHANGELOG.md
-LICENSE
-
-# ========== 测试快照 ==========
-__snapshots__/
-
-# ========== 项目特定文件 ==========
-# 添加项目特定的需要忽略的文件
+# 其他
+*.md
+*.html
+*.css

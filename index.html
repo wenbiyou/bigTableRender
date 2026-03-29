@@ -5,7 +5,10 @@
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>10万行大数据表格演示 | React + Web Worker + 虚拟滚动</title>
-    <meta name="description" content="使用React 18 + Ant Design + Web Worker + 虚拟滚动实现的10万行×10列大数据表格演示">
+    <meta
+      name="description"
+      content="使用React 18 + Ant Design + Web Worker + 虚拟滚动实现的10万行×10列大数据表格演示"
+    />
     <style>
       /* 加载动画 */
       #loading {
@@ -23,7 +26,7 @@
         z-index: 9999;
         transition: opacity 0.3s ease-out;
       }
-      
+
       .loading-spinner {
         width: 50px;
         height: 50px;
@@ -33,17 +36,19 @@
         animation: spin 1s ease-in-out infinite;
         margin-bottom: 20px;
       }
-      
+
       @keyframes spin {
-        to { transform: rotate(360deg); }
+        to {
+          transform: rotate(360deg);
+        }
       }
-      
+
       .loading-text {
         font-size: 18px;
         font-weight: 500;
         margin-bottom: 10px;
       }
-      
+
       .loading-subtext {
         font-size: 14px;
         opacity: 0.8;
@@ -59,17 +64,17 @@
       <div class="loading-spinner"></div>
       <div class="loading-text">正在加载大数据表格演示...</div>
       <div class="loading-subtext">
-        正在初始化10万行数据，请稍候<br>
+        正在初始化10万行数据，请稍候<br />
         <small>数据规模: 100,000行 × 10列 = 1,000,000个单元格</small>
       </div>
     </div>
-    
+
     <!-- 应用根节点 -->
     <div id="root"></div>
-    
+
     <!-- Vite入口文件 -->
     <script type="module" src="/src/main.jsx"></script>
-    
+
     <script type="module">
       // 隐藏加载动画
       window.addEventListener('load', () => {

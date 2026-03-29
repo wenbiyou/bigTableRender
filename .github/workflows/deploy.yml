@@ -3,8 +3,8 @@ name: Deploy to GitHub Pages
 on:
   # 推送到 main 分支时触发
   push:
-    branches: [ main ]
-  
+    branches: [main]
+
   # 手动触发部署
   workflow_dispatch:
 
@@ -16,18 +16,18 @@ permissions:
 
 # 并发控制
 concurrency:
-  group: "pages"
+  group: 'pages'
   cancel-in-progress: false
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # 获取所有历史记录，用于更好的缓存
+          fetch-depth: 0 # 获取所有历史记录，用于更好的缓存
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -66,10 +66,10 @@ jobs:
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
-    
+
     runs-on: ubuntu-latest
     needs: build
-    
+
     steps:
       - name: Deploy to GitHub Pages
         id: deployment

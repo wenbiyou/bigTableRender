@@ -3,30 +3,8 @@
 
 // 常量定义
 const TOTAL_ROWS = 100000;
-const COLUMN_NAMES = [
-  "ID",
-  "Col1",
-  "Col2",
-  "Col3",
-  "Col4",
-  "Col5",
-  "Col6",
-  "Col7",
-  "Col8",
-  "Col9",
-];
-const COLUMN_KEYS = [
-  "id",
-  "Col1",
-  "Col2",
-  "Col3",
-  "Col4",
-  "Col5",
-  "Col6",
-  "Col7",
-  "Col8",
-  "Col9",
-];
+const COLUMN_NAMES = ['ID', 'Col1', 'Col2', 'Col3', 'Col4', 'Col5', 'Col6', 'Col7', 'Col8', 'Col9'];
+const COLUMN_KEYS = ['id', 'Col1', 'Col2', 'Col3', 'Col4', 'Col5', 'Col6', 'Col7', 'Col8', 'Col9'];
 
 // 支持的筛选操作符
 const FILTER_OPERATORS = {
@@ -36,7 +14,7 @@ const FILTER_OPERATORS = {
   LESS_THAN: 'less_than',
   CONTAINS: 'contains',
   STARTS_WITH: 'starts_with',
-  ENDS_WITH: 'ends_with'
+  ENDS_WITH: 'ends_with',
 };
 
 // 全局数据存储
@@ -52,7 +30,7 @@ let multiSortColumns = []; // 多列排序配置
  * 每行包含ID和9个随机数值列，使用对象数组格式
  */
 function generateData() {
-  console.log("Worker: 开始生成数据...");
+  console.log('Worker: 开始生成数据...');
   const startTime = performance.now();
 
   const data = new Array(TOTAL_ROWS);
@@ -75,9 +53,7 @@ function generateData() {
   }
 
   const endTime = performance.now();
-  console.log(
-    `Worker: 数据生成完成，耗时 ${(endTime - startTime).toFixed(2)}ms`,
-  );
+  console.log(`Worker: 数据生成完成，耗时 ${(endTime - startTime).toFixed(2)}ms`);
 
   return data;
 }
@@ -87,17 +63,17 @@ function generateData() {
  */
 function getCurrentData() {
   let data = allData;
-  
+
   // 应用筛选
   if (filteredData && currentFilter) {
     data = filteredData;
   }
-  
+
   // 应用排序
   if (sortedData && currentSort.column !== null) {
     data = sortedData;
   }
-  
+
   return data;
 }
 
@@ -123,15 +99,13 @@ function sortData(columnIndex, direction) {
     const valA = a[columnKey];
     const valB = b[columnKey];
 
-    if (typeof valA === "number" && typeof valB === "number") {
-      return direction === "asc" ? valA - valB : valB - valA;
+    if (typeof valA === 'number' && typeof valB === 'number') {
+      return direction === 'asc' ? valA - valB : valB - valA;
     }
 
     const strA = String(valA);
     const strB = String(valB);
-    return direction === "asc"
-      ? strA.localeCompare(strB)
-      : strB.localeCompare(strA);
+    return direction === 'asc' ? strA.localeCompare(strB) : strB.localeCompare(strA);
   });
 
   return dataToSort;
@@ -143,30 +117,30 @@ function sortData(columnIndex, direction) {
  */
 function sortByMultiple(columns) {
   const dataToSort = getCurrentData().slice();
-  
+
   dataToSort.sort((a, b) => {
     for (const { columnIndex, direction } of columns) {
       const columnKey = COLUMN_KEYS[columnIndex];
       const valA = a[columnKey];
       const valB = b[columnKey];
-      
+
       let comparison = 0;
-      
-      if (typeof valA === "number" && typeof valB === "number") {
+
+      if (typeof valA === 'number' && typeof valB === 'number') {
         comparison = valA - valB;
       } else {
         const strA = String(valA);
         const strB = String(valB);
         comparison = strA.localeCompare(strB);
       }
-      
+
       if (comparison !== 0) {
-        return direction === "asc" ? comparison : -comparison;
+        return direction === 'asc' ? comparison : -comparison;
       }
     }
     return 0;
   });
-  
+
   return dataToSort;
 }
 
@@ -180,41 +154,61 @@ function applyFilter(filter) {
     filteredData = null;
     return allData;
   }
-  
+
   const columnKey = COLUMN_KEYS[filter.columnIndex];
   const filterValue = filter.value;
-  
-  const filtered = allData.filter(row => {
+  const filterValueTrimmed = String(filterValue).trim();
+
+  // 尝试将筛选值转换为数字（针对数值列）
+  const numericFilterValue = Number(filterValueTrimmed);
+  const isNumericFilter = !isNaN(numericFilterValue) && filterValueTrimmed !== '';
+
+  const filtered = allData.filter((row) => {
     const cellValue = row[columnKey];
-    
+
     switch (filter.operator) {
       case FILTER_OPERATORS.EQUALS:
-        return cellValue == filterValue;
+        // 如果是数值列且筛选值是数字，使用严格数字比较
+        if (isNumericFilter && typeof cellValue === 'number') {
+          return cellValue === numericFilterValue;
+        }
+        // 否则使用宽松比较
+        return cellValue == filterValueTrimmed;
       case FILTER_OPERATORS.NOT_EQUALS:
-        return cellValue != filterValue;
+        if (isNumericFilter && typeof cellValue === 'number') {
+          return cellValue !== numericFilterValue;
+        }
+        return cellValue != filterValueTrimmed;
       case FILTER_OPERATORS.GREATER_THAN:
-        return cellValue > filterValue;
+        if (isNumericFilter && typeof cellValue === 'number') {
+          return cellValue > numericFilterValue;
+        }
+        // 非数字比较
+        return String(cellValue) > filterValueTrimmed;
       case FILTER_OPERATORS.LESS_THAN:
-        return cellValue < filterValue;
+        if (isNumericFilter && typeof cellValue === 'number') {
+          return cellValue < numericFilterValue;
+        }
+        return String(cellValue) < filterValueTrimmed;
       case FILTER_OPERATORS.CONTAINS:
-        return String(cellValue).includes(String(filterValue));
+        return String(cellValue).includes(filterValueTrimmed);
       case FILTER_OPERATORS.STARTS_WITH:
-        return String(cellValue).startsWith(String(filterValue));
+        return String(cellValue).startsWith(filterValueTrimmed);
       case FILTER_OPERATORS.ENDS_WITH:
-        return String(cellValue).endsWith(String(filterValue));
+        return String(cellValue).endsWith(filterValueTrimmed);
       default:
         return true;
     }
   });
-  
+
   currentFilter = filter;
   filteredData = filtered;
-  
+
   // 重置排序，因为筛选后数据变了
   currentSort = { column: null, direction: null };
   sortedData = null;
   multiSortColumns = [];
-  
+
   return filtered;
 }
 
@@ -224,6 +218,10 @@ function applyFilter(filter) {
 function clearFilter() {
   currentFilter = null;
   filteredData = null;
+  // 重置排序，因为数据已改变
+  currentSort = { column: null, direction: null };
+  sortedData = null;
+  multiSortColumns = [];
   return allData;
 }
 
@@ -233,7 +231,7 @@ function clearFilter() {
 function getDataSlice(startIndex, count) {
   const dataSource = getCurrentData();
   const totalRows = getTotalRows();
-  
+
   const safeStart = Math.max(0, Math.min(startIndex, totalRows - 1));
   const safeEnd = Math.min(safeStart + count, totalRows);
   const slice = dataSource.slice(safeStart, safeEnd);
@@ -243,10 +241,10 @@ function getDataSlice(startIndex, count) {
     startIndex: safeStart,
     columnNames: COLUMN_NAMES,
     columnKeys: COLUMN_KEYS,
-    totalRows: totalRows,
+    totalRows,
     hasFilter: !!currentFilter,
     hasSort: currentSort.column !== null,
-    multiSortCount: multiSortColumns.length
+    multiSortCount: multiSortColumns.length,
   };
 }
 
@@ -266,23 +264,23 @@ function resetSort() {
  */
 function exportToCSV(rows = null) {
   const dataSource = getCurrentData();
-  const exportData = rows ? rows.map(index => dataSource[index]) : dataSource;
-  
+  const exportData = rows ? rows.map((index) => dataSource[index]) : dataSource;
+
   // 创建CSV头部
   const headers = COLUMN_NAMES.join(',');
-  
+
   // 创建数据行
-  const dataRows = exportData.map(row => {
-    return COLUMN_KEYS.map(key => {
+  const dataRows = exportData.map((row) =>
+    COLUMN_KEYS.map((key) => {
       const value = row[key];
       // 处理包含逗号或引号的值
       if (typeof value === 'string' && (value.includes(',') || value.includes('"'))) {
         return `"${value.replace(/"/g, '""')}"`;
       }
       return value;
-    }).join(',');
-  });
-  
+    }).join(',')
+  );
+
   return [headers, ...dataRows].join('\n');
 }
 
@@ -292,20 +290,24 @@ function exportToCSV(rows = null) {
  */
 function exportToJSON(rows = null) {
   const dataSource = getCurrentData();
-  const exportData = rows ? rows.map(index => dataSource[index]) : dataSource;
-  
-  return JSON.stringify({
-    metadata: {
-      totalRows: exportData.length,
-      columns: COLUMN_NAMES,
-      exportTime: new Date().toISOString(),
-      hasFilter: !!currentFilter,
-      hasSort: currentSort.column !== null,
-      filter: currentFilter,
-      sort: currentSort
+  const exportData = rows ? rows.map((index) => dataSource[index]) : dataSource;
+
+  return JSON.stringify(
+    {
+      metadata: {
+        totalRows: exportData.length,
+        columns: COLUMN_NAMES,
+        exportTime: new Date().toISOString(),
+        hasFilter: !!currentFilter,
+        hasSort: currentSort.column !== null,
+        filter: currentFilter,
+        sort: currentSort,
+      },
+      data: exportData,
     },
-    data: exportData
-  }, null, 2);
+    null,
+    2
+  );
 }
 
 /**
@@ -321,7 +323,7 @@ function getStatus() {
     hasFilter: !!currentFilter,
     hasSort: currentSort.column !== null,
     multiSortCount: multiSortColumns.length,
-    filterOperators: FILTER_OPERATORS
+    filterOperators: FILTER_OPERATORS,
   };
 }
 
@@ -331,7 +333,7 @@ allData = generateData();
 // ==============================
 // 🔥 消息处理
 // ==============================
-self.addEventListener("message", function (e) {
+self.addEventListener('message', function (e) {
   const { type, payload, requestId } = e.data;
 
   try {
@@ -339,58 +341,59 @@ self.addEventListener("message", function (e) {
     let returnType = type;
 
     switch (type) {
-      case "GET_SLICE":
+      case 'GET_SLICE':
         result = getDataSlice(payload.startIndex, payload.count);
-        returnType = "SLICE";
+        returnType = 'SLICE';
         break;
 
-      case "SORT":
+      case 'SORT':
         const { columnIndex, direction } = payload;
         sortedData = sortData(columnIndex, direction);
         currentSort = { column: columnIndex, direction };
         multiSortColumns = [{ columnIndex, direction }];
         result = { success: true };
-        returnType = "SORTED";
+        returnType = 'SORTED';
         break;
 
-      case "MULTI_SORT":
+      case 'MULTI_SORT':
         sortedData = sortByMultiple(payload.columns);
-        currentSort = payload.columns.length > 0 ? 
-          { column: payload.columns[0].columnIndex, direction: payload.columns[0].direction } : 
-          { column: null, direction: null };
+        currentSort =
+          payload.columns.length > 0
+            ? { column: payload.columns[0].columnIndex, direction: payload.columns[0].direction }
+            : { column: null, direction: null };
         multiSortColumns = payload.columns;
         result = { success: true };
-        returnType = "MULTI_SORTED";
+        returnType = 'MULTI_SORTED';
         break;
 
-      case "APPLY_FILTER":
-        result = applyFilter(payload.filter);
-        returnType = "FILTER_APPLIED";
+      case 'APPLY_FILTER':
+        result = { filter: currentFilter, data: applyFilter(payload.filter) };
+        returnType = 'FILTER_APPLIED';
         break;
 
-      case "CLEAR_FILTER":
-        result = clearFilter();
-        returnType = "FILTER_CLEARED";
+      case 'CLEAR_FILTER':
+        result = { filter: null, data: clearFilter() };
+        returnType = 'FILTER_CLEARED';
         break;
 
-      case "RESET_SORT":
+      case 'RESET_SORT':
         result = resetSort();
-        returnType = "RESET_SORTED";
+        returnType = 'RESET_SORTED';
         break;
 
-      case "EXPORT_CSV":
+      case 'EXPORT_CSV':
         result = exportToCSV(payload.rows);
-        returnType = "EXPORT_CSV_RESULT";
+        returnType = 'EXPORT_CSV_RESULT';
         break;
 
-      case "EXPORT_JSON":
+      case 'EXPORT_JSON':
         result = exportToJSON(payload.rows);
-        returnType = "EXPORT_JSON_RESULT";
+        returnType = 'EXPORT_JSON_RESULT';
         break;
 
-      case "GET_STATUS":
+      case 'GET_STATUS':
         result = getStatus();
-        returnType = "STATUS";
+        returnType = 'STATUS';
         break;
 
       default:
@@ -405,11 +408,11 @@ self.addEventListener("message", function (e) {
     });
   } catch (error) {
     self.postMessage({
-      type: "ERROR",
+      type: 'ERROR',
       payload: { error: error.message },
       requestId,
     });
   }
 });
 
-self.postMessage({ type: "READY", payload: { message: "增强版 Worker 已就绪" } });
+self.postMessage({ type: 'READY', payload: { message: '增强版 Worker 已就绪' } });

@@ -1,34 +1,30 @@
 # 构建输出
-dist/
-build/
-out/
-
-# 依赖
-node_modules/
-
-# 包锁文件
-package-lock.json
-yarn.lock
-pnpm-lock.yaml
+dist
+node_modules
 
 # 配置文件
+*.cjs
 *.config.js
-*.config.ts
 
-# GitHub Actions
-.github/workflows/
-
-# 脚本文件
-scripts/
-
-# 环境变量
-.env*
-!.env.example
+# Git
+.git
 
 # IDE
-.vscode/
-.idea/
+.vscode
+.idea
 
-# 操作系统
+# 系统文件
 .DS_Store
 Thumbs.db
+
+# 日志文件
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# 测试文件
+coverage
+
+# 其他
+*.md

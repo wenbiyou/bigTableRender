@@ -1,22 +1,5 @@
-import React, { useState, useEffect, useRef, useCallback } from "react";
-import { FixedSizeList as List } from "react-window";
-import { 
-  Button, 
-  Spin, 
-  Alert, 
-  Tooltip, 
-  Input, 
-  Select, 
-  Modal, 
-  Space, 
-  Tag,
-  Dropdown,
-  Menu,
-  notification,
-  Card,
-  Row,
-  Col
-} from "antd";
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+
 import {
   SortAscendingOutlined,
   SortDescendingOutlined,
@@ -27,8 +10,23 @@ import {
   ClearOutlined,
   PlusOutlined,
   SettingOutlined,
-  CheckOutlined
-} from "@ant-design/icons";
+  CheckOutlined,
+} from '@ant-design/icons';
+import {
+  Button,
+  Spin,
+  Alert,
+  Input,
+  Select,
+  Modal,
+  Space,
+  Tag,
+  notification,
+  Card,
+  Row,
+  Col,
+} from 'antd';
+import { FixedSizeList as List } from 'react-window';
 
 const { Option } = Select;
 const { TextArea } = Input;
@@ -47,12 +45,12 @@ const EnhancedBigDataTable = ({ worker }) => {
   const [currentFilter, setCurrentFilter] = useState(null);
   const [status, setStatus] = useState({
     totalRows: 0,
-    visibleRange: "0-0",
+    visibleRange: '0-0',
     columnNames: [],
     columnKeys: [],
     hasFilter: false,
     hasSort: false,
-    multiSortCount: 0
+    multiSortCount: 0,
   });
   const [error, setError] = useState(null);
   const [exportModalVisible, setExportModalVisible] = useState(false);
@@ -67,11 +65,9 @@ const EnhancedBigDataTable = ({ worker }) => {
   const [filterColumn, setFilterColumn] = useState(null);
   const [filterOperator, setFilterOperator] = useState('equals');
   const [filterValue, setFilterValue] = useState('');
-  
+
   // 多列排序状态
-  const [sortSteps, setSortSteps] = useState([
-    { columnIndex: null, direction: 'asc' }
-  ]);
+  const [sortSteps, setSortSteps] = useState([{ columnIndex: null, direction: 'asc' }]);
 
   // 引用 —— 解决闭包陷阱
   const listRef = useRef(null);
@@ -100,7 +96,7 @@ const EnhancedBigDataTable = ({ worker }) => {
     { value: 'less_than', label: '小于' },
     { value: 'contains', label: '包含' },
     { value: 'starts_with', label: '开头为' },
-    { value: 'ends_with', label: '结尾为' }
+    { value: 'ends_with', label: '结尾为' },
   ];
 
   // 同步最新状态到 ref
@@ -135,13 +131,13 @@ const EnhancedBigDataTable = ({ worker }) => {
       }
 
       switch (type) {
-        case "SLICE":
+        case 'SLICE':
           if (isMounted.current) {
             setVisibleData(payload.data);
             setDataStartIndex(payload.startIndex);
             setLoading(false);
-            
-            setStatus(prev => ({
+
+            setStatus((prev) => ({
               ...prev,
               totalRows: payload.totalRows || 0,
               visibleRange: `${payload.startIndex}-${payload.startIndex + payload.data.length}`,
@@ -149,32 +145,34 @@ const EnhancedBigDataTable = ({ worker }) => {
               columnKeys: payload.columnKeys || [],
               hasFilter: payload.hasFilter || false,
               hasSort: payload.hasSort || false,
-              multiSortCount: payload.multiSortCount || 0
+              multiSortCount: payload.multiSortCount || 0,
             }));
           }
           break;
 
-        case "SORTED":
+        case 'SORTED':
           if (isMounted.current) {
             setSorting(false);
             setCurrentSort(payload.sort || { column: null, direction: null });
-            setMultiSortColumns([{ 
-              columnIndex: payload.sort?.column, 
-              direction: payload.sort?.direction 
-            }]);
+            setMultiSortColumns([
+              {
+                columnIndex: payload.sort?.column,
+                direction: payload.sort?.direction,
+              },
+            ]);
             // 重新加载当前可视区域数据
             loadVisibleData(dataStartRef.current);
           }
           break;
 
-        case "MULTI_SORTED":
+        case 'MULTI_SORTED':
           if (isMounted.current) {
             setSorting(false);
             setMultiSortColumns(payload.columns || []);
             if (payload.columns.length > 0) {
               setCurrentSort({
                 column: payload.columns[0].columnIndex,
-                direction: payload.columns[0].direction
+                direction: payload.columns[0].direction,
               });
             } else {
               setCurrentSort({ column: null, direction: null });
@@ -183,22 +181,26 @@ const EnhancedBigDataTable = ({ worker }) => {
           }
           break;
 
-        case "FILTER_APPLIED":
+        case 'FILTER_APPLIED':
           if (isMounted.current) {
             setCurrentFilter(payload.filter || null);
+            setCurrentSort({ column: null, direction: null }); // 筛选后重置排序
+            setMultiSortColumns([]); // 筛选后重置多列排序
             loadVisibleData(0); // 筛选后从第一行开始
           }
           break;
 
-        case "FILTER_CLEARED":
+        case 'FILTER_CLEARED':
           if (isMounted.current) {
             setCurrentFilter(null);
+            setCurrentSort({ column: null, direction: null }); // 清除筛选后重置排序
+            setMultiSortColumns([]); // 清除筛选后重置多列排序
             loadVisibleData(dataStartRef.current);
           }
           break;
 
-        case "EXPORT_CSV_RESULT":
-        case "EXPORT_JSON_RESULT":
+        case 'EXPORT_CSV_RESULT':
+        case 'EXPORT_JSON_RESULT':
           if (isMounted.current) {
             setExportContent(payload);
             notification.success({
@@ -208,21 +210,21 @@ const EnhancedBigDataTable = ({ worker }) => {
           }
           break;
 
-        case "STATUS":
+        case 'STATUS':
           if (isMounted.current) {
-            setStatus(prev => ({
+            setStatus((prev) => ({
               ...prev,
               totalRows: payload.totalRows || 0,
               columnNames: payload.columnNames || [],
               columnKeys: payload.columnKeys || [],
               hasFilter: payload.hasFilter || false,
               hasSort: payload.hasSort || false,
-              multiSortCount: payload.multiSortCount || 0
+              multiSortCount: payload.multiSortCount || 0,
             }));
           }
           break;
 
-        case "ERROR":
+        case 'ERROR':
           if (isMounted.current) {
             setError(payload.error);
             setLoading(false);
@@ -232,10 +234,10 @@ const EnhancedBigDataTable = ({ worker }) => {
       }
     };
 
-    worker.addEventListener("message", handleWorkerMessage);
+    worker.addEventListener('message', handleWorkerMessage);
 
     return () => {
-      worker.removeEventListener("message", handleWorkerMessage);
+      worker.removeEventListener('message', handleWorkerMessage);
     };
   }, [worker]);
 
@@ -245,16 +247,18 @@ const EnhancedBigDataTable = ({ worker }) => {
       if (!worker || !isMounted.current) return;
 
       // 调试日志
-      console.log(`📊 loadVisibleData 调用: startIndex=${startIndex}, scrollDirection=${scrollDirectionRef.current}`);
-      
+      console.log(
+        `📊 loadVisibleData 调用: startIndex=${startIndex}, scrollDirection=${scrollDirectionRef.current}`
+      );
+
       // 边界检查
       const safeStart = Math.max(0, startIndex);
       const totalRows = status.totalRows || 100000;
       if (safeStart >= totalRows) return;
 
-      // 检查是否已有相同请求在处理中
+      // 检查是否已有相同请求在处理中（顶部数据请求不检查，确保顶部数据能加载）
       const requestKey = `load-${safeStart}`;
-      if (pendingRequests.current.has(requestKey)) {
+      if (pendingRequests.current.has(requestKey) && safeStart !== 0) {
         console.log(`🔄 已有相同请求在处理中: ${requestKey}`);
         return;
       }
@@ -263,7 +267,7 @@ const EnhancedBigDataTable = ({ worker }) => {
       const currentStart = dataStartRef.current;
       const currentData = visibleDataRef.current;
       const currentEnd = currentStart + currentData.length;
-      const currentLength = currentData.length;
+      // const currentLength = currentData.length; // 暂时未使用
 
       // 请求的数据范围
       const requestLength = VISIBLE_ROWS + BUFFER_ROWS * 2;
@@ -274,16 +278,34 @@ const EnhancedBigDataTable = ({ worker }) => {
       const overlapEnd = Math.min(currentEnd, requestEnd);
       const overlapLength = Math.max(0, overlapEnd - overlapStart);
 
-      // 判断滚动方向 - 主要基于实际滚动方向，位置作为辅助
+      // 判断滚动方向 - 结合实际滚动方向和位置判断
       const isScrollingUp = scrollDirectionRef.current === 'up';
       const isScrollingDown = scrollDirectionRef.current === 'down';
-      
-      // 如果没有滚动方向信息（初始状态），使用位置判断
+
+      // 位置判断：请求的数据位置比当前数据位置更早就是向上滚动
       const positionBasedUp = safeStart < currentStart;
       const positionBasedDown = safeStart > currentStart;
-      const finalIsScrollingUp = isScrollingUp || (scrollDirectionRef.current === 'none' && positionBasedUp);
-      const finalIsScrollingDown = isScrollingDown || (scrollDirectionRef.current === 'none' && positionBasedDown);
-      
+
+      // 最终判断：优先使用滚动方向，但当位置明显指示相反方向时，使用位置判断
+      // 这有助于处理快速滚动时方向检测延迟的问题
+      let finalIsScrollingUp = isScrollingUp;
+      let finalIsScrollingDown = isScrollingDown;
+
+      if (!isScrollingUp && !isScrollingDown) {
+        // 没有滚动方向信息时，使用位置判断
+        finalIsScrollingUp = positionBasedUp;
+        finalIsScrollingDown = positionBasedDown;
+      } else if (isScrollingDown && positionBasedUp) {
+        // 如果滚动方向是向下，但位置明显指示向上（请求更早的数据），则认为是向上滚动
+        // 这发生在用户快速改变滚动方向时
+        console.log(`🔄 方向冲突：滚动方向=down，但位置指示向上，使用位置判断`);
+        finalIsScrollingUp = true;
+        finalIsScrollingDown = false;
+      } else if (isScrollingUp && positionBasedDown) {
+        // 如果滚动方向是向上，但位置指示向下，使用滚动方向（这种情况较少见）
+        console.log(`🔄 方向冲突：滚动方向=up，但位置指示向下，保持滚动方向`);
+      }
+
       // 检查是否需要加载新数据
       let shouldSkip = false;
       let skipReason = '';
@@ -323,32 +345,39 @@ const EnhancedBigDataTable = ({ worker }) => {
         shouldSkip = false;
         skipReason = `向上滚动强制加载`;
       }
-      
+
+      // 🚨 修复：滚动到顶部时永远加载数据
+      if (safeStart === 0) {
+        console.log(`🚨 滚动到顶部，强制加载数据`);
+        shouldSkip = false;
+        skipReason = `滚动到顶部强制加载`;
+      }
+
       if (shouldSkip && safeStart !== 0) {
         console.log(`跳过加载: ${skipReason}`);
-        
+
         // 即使跳过加载，也需要更新数据起始索引
         if (safeStart !== dataStartRef.current) {
           // 计算需要从缓存中提取的数据
           const cacheStart = Math.max(currentStart, safeStart);
           const cacheEnd = Math.min(currentEnd, safeStart + VISIBLE_ROWS);
           const cacheLength = cacheEnd - cacheStart;
-          
+
           if (cacheLength > 0) {
             // 从缓存中提取数据
             const cacheIndex = cacheStart - currentStart;
             const newVisibleData = currentData.slice(cacheIndex, cacheIndex + cacheLength);
-            
+
             // 更新状态
             setVisibleData(newVisibleData);
             setDataStartIndex(cacheStart);
-            setStatus(prev => ({
+            setStatus((prev) => ({
               ...prev,
-              visibleRange: `${cacheStart}-${cacheEnd}`
+              visibleRange: `${cacheStart}-${cacheEnd}`,
             }));
           }
         }
-        
+
         if (shouldSkip) {
           return;
         }
@@ -364,7 +393,7 @@ const EnhancedBigDataTable = ({ worker }) => {
 
       // 发送请求到Worker
       worker.postMessage({
-        type: "GET_SLICE",
+        type: 'GET_SLICE',
         payload: {
           startIndex: safeStart,
           count: requestLength,
@@ -372,14 +401,14 @@ const EnhancedBigDataTable = ({ worker }) => {
         requestId,
       });
     },
-    [worker, status.totalRows],
+    [worker, status.totalRows]
   );
 
   // 处理滚动 - 添加防抖、方向感知和智能加载
   const handleScroll = useCallback(
     ({ scrollOffset }) => {
       const startIndex = Math.floor(scrollOffset / ROW_HEIGHT);
-      
+
       // 计算滚动方向
       if (scrollOffset !== lastScrollOffsetRef.current) {
         const newDirection = scrollOffset > lastScrollOffsetRef.current ? 'down' : 'up';
@@ -389,23 +418,23 @@ const EnhancedBigDataTable = ({ worker }) => {
         }
         lastScrollOffsetRef.current = scrollOffset;
       }
-      
+
       // 智能防抖：根据滚动方向调整频率
       const now = Date.now();
       const timeSinceLastScroll = now - lastScrollTimeRef.current;
-      
+
       // 向下滚动可以更频繁（用户快速浏览）
       // 向上滚动需要更谨慎（用户可能在看特定内容）
       const debounceTime = scrollDirectionRef.current === 'down' ? 30 : 50;
-      
+
       if (timeSinceLastScroll < debounceTime) {
         return;
       }
       lastScrollTimeRef.current = now;
-      
+
       loadVisibleData(startIndex);
     },
-    [loadVisibleData],
+    [loadVisibleData]
   );
 
   // 单列排序
@@ -414,27 +443,25 @@ const EnhancedBigDataTable = ({ worker }) => {
       if (!worker || sorting) return;
 
       const newDirection =
-        currentSort.column === columnIndex && currentSort.direction === "asc"
-          ? "desc"
-          : "asc";
+        currentSort.column === columnIndex && currentSort.direction === 'asc' ? 'desc' : 'asc';
 
       setSorting(true);
       setCurrentSort({ column: columnIndex, direction: newDirection });
 
       worker.postMessage({
-        type: "SORT",
+        type: 'SORT',
         payload: { columnIndex, direction: newDirection },
         requestId: `sort-${Date.now()}`,
       });
     },
-    [worker, sorting, currentSort],
+    [worker, sorting, currentSort]
   );
 
   // 应用多列排序
   const applyMultiSort = useCallback(() => {
     if (!worker || sorting) return;
 
-    const validSteps = sortSteps.filter(step => step.columnIndex !== null);
+    const validSteps = sortSteps.filter((step) => step.columnIndex !== null);
     if (validSteps.length === 0) {
       notification.warning({
         message: '排序配置为空',
@@ -447,7 +474,7 @@ const EnhancedBigDataTable = ({ worker }) => {
     setMultiSortColumns(validSteps);
 
     worker.postMessage({
-      type: "MULTI_SORT",
+      type: 'MULTI_SORT',
       payload: { columns: validSteps },
       requestId: `multi-sort-${Date.now()}`,
     });
@@ -466,13 +493,13 @@ const EnhancedBigDataTable = ({ worker }) => {
     }
 
     worker.postMessage({
-      type: "APPLY_FILTER",
+      type: 'APPLY_FILTER',
       payload: {
         filter: {
           columnIndex: filterColumn,
           operator: filterOperator,
-          value: filterValue
-        }
+          value: filterValue,
+        },
       },
       requestId: `filter-${Date.now()}`,
     });
@@ -485,7 +512,7 @@ const EnhancedBigDataTable = ({ worker }) => {
     if (!worker) return;
 
     worker.postMessage({
-      type: "CLEAR_FILTER",
+      type: 'CLEAR_FILTER',
       requestId: `clear-filter-${Date.now()}`,
     });
 
@@ -499,7 +526,7 @@ const EnhancedBigDataTable = ({ worker }) => {
     if (!worker) return;
 
     worker.postMessage({
-      type: "RESET_SORT",
+      type: 'RESET_SORT',
       requestId: `reset-${Date.now()}`,
     });
 
@@ -514,16 +541,13 @@ const EnhancedBigDataTable = ({ worker }) => {
 
     let rowsToExport = null;
     if (exportRows === 'visible') {
-      rowsToExport = Array.from(
-        { length: visibleData.length },
-        (_, i) => dataStartIndex + i
-      );
+      rowsToExport = Array.from({ length: visibleData.length }, (_, i) => dataStartIndex + i);
     } else if (exportRows === 'selected' && selectedRows.size > 0) {
       rowsToExport = Array.from(selectedRows);
     }
 
     const exportType = exportFormat === 'csv' ? 'EXPORT_CSV' : 'EXPORT_JSON';
-    
+
     worker.postMessage({
       type: exportType,
       payload: { rows: rowsToExport },
@@ -536,7 +560,7 @@ const EnhancedBigDataTable = ({ worker }) => {
     if (!exportContent) return;
 
     const blob = new Blob([exportContent], {
-      type: exportFormat === 'csv' ? 'text/csv' : 'application/json'
+      type: exportFormat === 'csv' ? 'text/csv' : 'application/json',
     });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -550,12 +574,12 @@ const EnhancedBigDataTable = ({ worker }) => {
 
   // 添加排序步骤
   const addSortStep = useCallback(() => {
-    setSortSteps(prev => [...prev, { columnIndex: null, direction: 'asc' }]);
+    setSortSteps((prev) => [...prev, { columnIndex: null, direction: 'asc' }]);
   }, []);
 
   // 更新排序步骤
   const updateSortStep = useCallback((index, field, value) => {
-    setSortSteps(prev => {
+    setSortSteps((prev) => {
       const newSteps = [...prev];
       newSteps[index] = { ...newSteps[index], [field]: value };
       return newSteps;
@@ -564,7 +588,7 @@ const EnhancedBigDataTable = ({ worker }) => {
 
   // 删除排序步骤
   const removeSortStep = useCallback((index) => {
-    setSortSteps(prev => {
+    setSortSteps((prev) => {
       const newSteps = prev.filter((_, i) => i !== index);
       return newSteps.length > 0 ? newSteps : [{ columnIndex: null, direction: 'asc' }];
     });
@@ -582,15 +606,15 @@ const EnhancedBigDataTable = ({ worker }) => {
           <div
             style={{
               ...style,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              borderBottom: "1px solid #f0f0f0",
-              background: "#fafafa",
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              borderBottom: '1px solid #f0f0f0',
+              background: '#fafafa',
             }}
           >
             <Spin size="small" />
-            <span style={{ marginLeft: 8, color: "#999" }}>加载中...</span>
+            <span style={{ marginLeft: 8, color: '#999' }}>加载中...</span>
           </div>
         );
       }
@@ -599,12 +623,12 @@ const EnhancedBigDataTable = ({ worker }) => {
         <div
           style={{
             ...style,
-            display: "flex",
-            borderBottom: "1px solid #f0f0f0",
-            background: isSelected ? '#e6f7ff' : (index % 2 === 0 ? "#fff" : "#fafafa"),
+            display: 'flex',
+            borderBottom: '1px solid #f0f0f0',
+            background: isSelected ? '#e6f7ff' : index % 2 === 0 ? '#fff' : '#fafafa',
             cursor: 'pointer',
             padding: '0 16px',
-            alignItems: 'center'
+            alignItems: 'center',
           }}
           onClick={() => {
             const newSelected = new Set(selectedRows);
@@ -624,11 +648,11 @@ const EnhancedBigDataTable = ({ worker }) => {
               key={colIndex}
               style={{
                 flex: 1,
-                padding: "12px 8px",
+                padding: '12px 8px',
                 minWidth: 120,
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-                whiteSpace: "nowrap",
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
               }}
             >
               {rowData[key]}
@@ -637,7 +661,7 @@ const EnhancedBigDataTable = ({ worker }) => {
         </div>
       );
     },
-    [dataStartIndex, visibleData, status.columnKeys, selectedRows],
+    [dataStartIndex, visibleData, status.columnKeys, selectedRows]
   );
 
   // 渲染表头
@@ -647,12 +671,12 @@ const EnhancedBigDataTable = ({ worker }) => {
     return (
       <div
         style={{
-          display: "flex",
-          background: "#fafafa",
-          borderBottom: "2px solid #1890ff",
-          fontWeight: "bold",
-          padding: "12px 16px",
-          position: "sticky",
+          display: 'flex',
+          background: '#fafafa',
+          borderBottom: '2px solid #1890ff',
+          fontWeight: 'bold',
+          padding: '12px 16px',
+          position: 'sticky',
           top: 0,
           zIndex: 10,
         }}
@@ -660,22 +684,26 @@ const EnhancedBigDataTable = ({ worker }) => {
         <div style={{ width: 40, textAlign: 'center', color: '#999' }}>#</div>
         {status.columnNames.map((name, index) => {
           const isSorted = currentSort.column === index;
-          const isMultiSorted = multiSortColumns.some(col => col.columnIndex === index);
-          const multiSortIndex = multiSortColumns.findIndex(col => col.columnIndex === index);
-          
+          const isMultiSorted = multiSortColumns.some((col) => col.columnIndex === index);
+          const multiSortIndex = multiSortColumns.findIndex((col) => col.columnIndex === index);
+
           return (
             <div
               key={index}
               style={{
                 flex: 1,
-                padding: "12px 8px",
+                padding: '12px 8px',
                 minWidth: 120,
-                cursor: "pointer",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                background: isSorted ? "#e6f7ff" : (isMultiSorted ? "#f6ffed" : "transparent"),
-                border: isSorted ? "1px solid #91d5ff" : (isMultiSorted ? "1px solid #b7eb8f" : "none"),
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                background: isSorted ? '#e6f7ff' : isMultiSorted ? '#f6ffed' : 'transparent',
+                border: isSorted
+                  ? '1px solid #91d5ff'
+                  : isMultiSorted
+                    ? '1px solid #b7eb8f'
+                    : 'none',
                 borderRadius: 4,
               }}
               onClick={() => handleSort(index)}
@@ -687,15 +715,14 @@ const EnhancedBigDataTable = ({ worker }) => {
                     {multiSortIndex + 1}
                   </Tag>
                 )}
-                {isSorted && (
-                  currentSort.direction === "asc" ? (
-                    <SortAscendingOutlined style={{ color: "#1890ff" }} />
+                {isSorted &&
+                  (currentSort.direction === 'asc' ? (
+                    <SortAscendingOutlined style={{ color: '#1890ff' }} />
                   ) : (
-                    <SortDescendingOutlined style={{ color: "#1890ff" }} />
-                  )
-                )}
+                    <SortDescendingOutlined style={{ color: '#1890ff' }} />
+                  ))}
                 {!isSorted && !isMultiSorted && (
-                  <SortAscendingOutlined style={{ color: "#d9d9d9" }} />
+                  <SortAscendingOutlined style={{ color: '#d9d9d9' }} />
                 )}
               </div>
             </div>
@@ -706,8 +733,8 @@ const EnhancedBigDataTable = ({ worker }) => {
   }, [status.columnNames, currentSort, multiSortColumns, handleSort]);
 
   // 渲染控制面板
-  const renderControlPanel = useCallback(() => {
-    return (
+  const renderControlPanel = useCallback(
+    () => (
       <Card style={{ marginBottom: 16 }}>
         <Row gutter={[16, 16]} align="middle">
           <Col flex="auto">
@@ -719,9 +746,13 @@ const EnhancedBigDataTable = ({ worker }) => {
                 disabled={!worker}
               >
                 数据筛选
-                {currentFilter && <Tag color="blue" style={{ marginLeft: 4 }}>已启用</Tag>}
+                {currentFilter && (
+                  <Tag color="blue" style={{ marginLeft: 4 }}>
+                    已启用
+                  </Tag>
+                )}
               </Button>
-              
+
               <Button
                 icon={<SettingOutlined />}
                 onClick={() => setMultiSortModalVisible(true)}
@@ -734,7 +765,7 @@ const EnhancedBigDataTable = ({ worker }) => {
                   </Tag>
                 )}
               </Button>
-              
+
               <Button
                 icon={<ExportOutlined />}
                 onClick={() => setExportModalVisible(true)}
@@ -742,7 +773,7 @@ const EnhancedBigDataTable = ({ worker }) => {
               >
                 数据导出
               </Button>
-              
+
               <Button
                 icon={<ReloadOutlined />}
                 onClick={resetSort}
@@ -750,7 +781,7 @@ const EnhancedBigDataTable = ({ worker }) => {
               >
                 重置排序
               </Button>
-              
+
               <Button
                 icon={<ClearOutlined />}
                 onClick={clearFilter}
@@ -760,34 +791,33 @@ const EnhancedBigDataTable = ({ worker }) => {
               </Button>
             </Space>
           </Col>
-          
+
           <Col>
             <Space>
-              <Tag color="blue">
-                总行数: {status.totalRows.toLocaleString()}
+              <Tag color="blue">总行数: {status.totalRows.toLocaleString()}</Tag>
+              <Tag color={status.hasFilter ? 'green' : 'default'}>
+                筛选: {status.hasFilter ? '启用' : '关闭'}
               </Tag>
-              <Tag color={status.hasFilter ? "green" : "default"}>
-                筛选: {status.hasFilter ? "启用" : "关闭"}
+              <Tag color={status.hasSort ? 'orange' : 'default'}>
+                排序: {status.hasSort ? '启用' : '关闭'}
               </Tag>
-              <Tag color={status.hasSort ? "orange" : "default"}>
-                排序: {status.hasSort ? "启用" : "关闭"}
-              </Tag>
-              <Tag color={multiSortColumns.length > 1 ? "purple" : "default"}>
+              <Tag color={multiSortColumns.length > 1 ? 'purple' : 'default'}>
                 多列排序: {multiSortColumns.length}列
               </Tag>
-              <Tag color={selectedRows.size > 0 ? "red" : "default"}>
+              <Tag color={selectedRows.size > 0 ? 'red' : 'default'}>
                 已选: {selectedRows.size}行
               </Tag>
             </Space>
           </Col>
         </Row>
       </Card>
-    );
-  }, [worker, currentFilter, multiSortColumns, status, selectedRows, resetSort, clearFilter]);
+    ),
+    [worker, currentFilter, multiSortColumns, status, selectedRows, resetSort, clearFilter]
+  );
 
   // 渲染筛选模态框
-  const renderFilterModal = useCallback(() => {
-    return (
+  const renderFilterModal = useCallback(
+    () => (
       <Modal
         title="数据筛选"
         open={filterModalVisible}
@@ -807,24 +837,24 @@ const EnhancedBigDataTable = ({ worker }) => {
               onChange={setFilterColumn}
             >
               {status.columnNames.map((name, index) => (
-                <Option key={index} value={index}>{name}</Option>
+                <Option key={index} value={index}>
+                  {name}
+                </Option>
               ))}
             </Select>
           </div>
-          
+
           <div>
             <div style={{ marginBottom: 8, fontWeight: 'bold' }}>选择操作符</div>
-            <Select
-              style={{ width: '100%' }}
-              value={filterOperator}
-              onChange={setFilterOperator}
-            >
-              {filterOperators.map(op => (
-                <Option key={op.value} value={op.value}>{op.label}</Option>
+            <Select style={{ width: '100%' }} value={filterOperator} onChange={setFilterOperator}>
+              {filterOperators.map((op) => (
+                <Option key={op.value} value={op.value}>
+                  {op.label}
+                </Option>
               ))}
             </Select>
           </div>
-          
+
           <div>
             <div style={{ marginBottom: 8, fontWeight: 'bold' }}>筛选值</div>
             <Input
@@ -834,23 +864,32 @@ const EnhancedBigDataTable = ({ worker }) => {
               onPressEnter={applyFilter}
             />
           </div>
-          
+
           {currentFilter && (
             <Alert
               message="当前筛选条件"
-              description={`${status.columnNames[currentFilter.columnIndex]} ${filterOperators.find(op => op.value === currentFilter.operator)?.label} ${currentFilter.value}`}
+              description={`${status.columnNames[currentFilter.columnIndex]} ${filterOperators.find((op) => op.value === currentFilter.operator)?.label} ${currentFilter.value}`}
               type="info"
               showIcon
             />
           )}
         </Space>
       </Modal>
-    );
-  }, [filterModalVisible, filterColumn, filterOperator, filterValue, status.columnNames, currentFilter, applyFilter]);
+    ),
+    [
+      filterModalVisible,
+      filterColumn,
+      filterOperator,
+      filterValue,
+      status.columnNames,
+      currentFilter,
+      applyFilter,
+    ]
+  );
 
   // 渲染多列排序模态框
-  const renderMultiSortModal = useCallback(() => {
-    return (
+  const renderMultiSortModal = useCallback(
+    () => (
       <Modal
         title="多列排序配置"
         open={multiSortModalVisible}
@@ -867,12 +906,14 @@ const EnhancedBigDataTable = ({ worker }) => {
             type="info"
             showIcon
           />
-          
+
           {sortSteps.map((step, index) => (
             <Card key={index} size="small">
               <Row gutter={16} align="middle">
                 <Col span={2}>
-                  <Tag color="blue" style={{ margin: 0 }}>步骤 {index + 1}</Tag>
+                  <Tag color="blue" style={{ margin: 0 }}>
+                    步骤 {index + 1}
+                  </Tag>
                 </Col>
                 <Col span={10}>
                   <Select
@@ -883,7 +924,9 @@ const EnhancedBigDataTable = ({ worker }) => {
                   >
                     <Option value={null}>请选择列</Option>
                     {status.columnNames.map((name, colIndex) => (
-                      <Option key={colIndex} value={colIndex}>{name}</Option>
+                      <Option key={colIndex} value={colIndex}>
+                        {name}
+                      </Option>
                     ))}
                   </Select>
                 </Col>
@@ -899,11 +942,7 @@ const EnhancedBigDataTable = ({ worker }) => {
                 </Col>
                 <Col span={4}>
                   {sortSteps.length > 1 && (
-                    <Button
-                      danger
-                      size="small"
-                      onClick={() => removeSortStep(index)}
-                    >
+                    <Button danger size="small" onClick={() => removeSortStep(index)}>
                       删除
                     </Button>
                   )}
@@ -911,16 +950,11 @@ const EnhancedBigDataTable = ({ worker }) => {
               </Row>
             </Card>
           ))}
-          
-          <Button
-            type="dashed"
-            icon={<PlusOutlined />}
-            onClick={addSortStep}
-            block
-          >
+
+          <Button type="dashed" icon={<PlusOutlined />} onClick={addSortStep} block>
             添加排序步骤
           </Button>
-          
+
           {multiSortColumns.length > 0 && (
             <Alert
               message="当前排序配置"
@@ -928,7 +962,8 @@ const EnhancedBigDataTable = ({ worker }) => {
                 <div>
                   {multiSortColumns.map((col, idx) => (
                     <div key={idx}>
-                      {idx + 1}. {status.columnNames[col.columnIndex]} ({col.direction === 'asc' ? '升序' : '降序'})
+                      {idx + 1}. {status.columnNames[col.columnIndex]} (
+                      {col.direction === 'asc' ? '升序' : '降序'})
                     </div>
                   ))}
                 </div>
@@ -939,12 +974,22 @@ const EnhancedBigDataTable = ({ worker }) => {
           )}
         </Space>
       </Modal>
-    );
-  }, [multiSortModalVisible, sortSteps, status.columnNames, multiSortColumns, applyMultiSort, updateSortStep, removeSortStep, addSortStep]);
+    ),
+    [
+      multiSortModalVisible,
+      sortSteps,
+      status.columnNames,
+      multiSortColumns,
+      applyMultiSort,
+      updateSortStep,
+      removeSortStep,
+      addSortStep,
+    ]
+  );
 
   // 渲染导出模态框
-  const renderExportModal = useCallback(() => {
-    return (
+  const renderExportModal = useCallback(
+    () => (
       <Modal
         title="数据导出"
         open={exportModalVisible}
@@ -963,9 +1008,9 @@ const EnhancedBigDataTable = ({ worker }) => {
           <Button key="export" type="primary" onClick={handleExport}>
             生成导出
           </Button>,
-          <Button 
-            key="download" 
-            type="primary" 
+          <Button
+            key="download"
+            type="primary"
             icon={<DownloadOutlined />}
             onClick={downloadExport}
             disabled={!exportContent}
@@ -978,22 +1023,14 @@ const EnhancedBigDataTable = ({ worker }) => {
           <Row gutter={16}>
             <Col span={12}>
               <div style={{ marginBottom: 8, fontWeight: 'bold' }}>导出格式</div>
-              <Select
-                style={{ width: '100%' }}
-                value={exportFormat}
-                onChange={setExportFormat}
-              >
+              <Select style={{ width: '100%' }} value={exportFormat} onChange={setExportFormat}>
                 <Option value="csv">CSV (逗号分隔值)</Option>
                 <Option value="json">JSON (JavaScript对象表示法)</Option>
               </Select>
             </Col>
             <Col span={12}>
               <div style={{ marginBottom: 8, fontWeight: 'bold' }}>导出范围</div>
-              <Select
-                style={{ width: '100%' }}
-                value={exportRows}
-                onChange={setExportRows}
-              >
+              <Select style={{ width: '100%' }} value={exportRows} onChange={setExportRows}>
                 <Option value="all">全部数据 ({status.totalRows.toLocaleString()} 行)</Option>
                 <Option value="visible">当前可视区域 ({visibleData.length} 行)</Option>
                 <Option value="selected" disabled={selectedRows.size === 0}>
@@ -1002,7 +1039,7 @@ const EnhancedBigDataTable = ({ worker }) => {
               </Select>
             </Col>
           </Row>
-          
+
           <div>
             <div style={{ marginBottom: 8, fontWeight: 'bold' }}>导出预览</div>
             <TextArea
@@ -1013,7 +1050,7 @@ const EnhancedBigDataTable = ({ worker }) => {
               style={{ fontFamily: 'monospace', fontSize: 12 }}
             />
           </div>
-          
+
           <Alert
             message="导出说明"
             description={
@@ -1029,8 +1066,19 @@ const EnhancedBigDataTable = ({ worker }) => {
           />
         </Space>
       </Modal>
-    );
-  }, [exportModalVisible, exportFormat, exportRows, status.totalRows, visibleData.length, selectedRows, exportContent, handleExport, downloadExport]);
+    ),
+    [
+      exportModalVisible,
+      exportFormat,
+      exportRows,
+      status.totalRows,
+      visibleData.length,
+      selectedRows,
+      exportContent,
+      handleExport,
+      downloadExport,
+    ]
+  );
 
   // 渲染错误提示
   const renderError = useCallback(() => {
@@ -1063,7 +1111,7 @@ const EnhancedBigDataTable = ({ worker }) => {
     <div style={{ maxWidth: '100%', overflow: 'hidden' }}>
       {renderControlPanel()}
       {renderError()}
-      
+
       {loading && (
         <div style={{ textAlign: 'center', padding: '20px' }}>
           <Spin size="large" />
@@ -1073,7 +1121,7 @@ const EnhancedBigDataTable = ({ worker }) => {
 
       <div style={{ border: '1px solid #f0f0f0', borderRadius: 8, overflow: 'hidden' }}>
         {renderTableHeader()}
-        
+
         <List
           ref={listRef}
           height={ROW_HEIGHT * VISIBLE_ROWS}

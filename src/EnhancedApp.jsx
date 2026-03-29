@@ -1,15 +1,17 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Card, Typography, Alert, Spin, Button, Space, Tabs, Badge, Tag } from 'antd';
-import { 
-  DatabaseOutlined, 
-  RocketOutlined, 
+
+import {
+  DatabaseOutlined,
+  RocketOutlined,
   SyncOutlined,
   FilterOutlined,
   SortAscendingOutlined,
   ExportOutlined,
-  ExperimentOutlined
+  ExperimentOutlined,
 } from '@ant-design/icons';
-import EnhancedBigDataTable from './components/EnhancedBigDataTable.jsx';
+import { Card, Typography, Alert, Spin, Button, Space, Tabs, Badge, Tag } from 'antd';
+
+import EnhancedBigDataTable from './components/EnhancedBigDataTable';
 import { initGitHubPagesRouter } from './utils/gh-pages-router';
 
 const { Title, Paragraph, Text } = Typography;
@@ -25,7 +27,7 @@ function EnhancedApp() {
   const [error, setError] = useState(null);
   const [performanceInfo, setPerformanceInfo] = useState(null);
   const [activeTab, setActiveTab] = useState('enhanced');
-  
+
   const workerRef = useRef(null);
   const initTimeRef = useRef(null);
 
@@ -37,53 +39,58 @@ function EnhancedApp() {
       setWorkerStatus('initializing');
       setError(null);
       initTimeRef.current = performance.now();
-      
+
       // 创建增强版Web Worker
       const newWorker = new Worker(new URL('./workers/dataWorkerEnhanced.js', import.meta.url), {
-        type: 'module'
+        type: 'module',
       });
-      
+
       workerRef.current = newWorker;
-      
+
       // Worker消息处理
       const handleWorkerMessage = (e) => {
         switch (e.data.type) {
-          case 'READY':
+          case 'READY': {
             const initTime = performance.now() - initTimeRef.current;
             setPerformanceInfo({
               initTime: initTime.toFixed(2),
               dataSize: '10万行 × 10列 (100万单元格)',
-              features: ['筛选', '多列排序', '数据导出']
+              features: ['筛选', '多列排序', '数据导出'],
             });
             setWorkerStatus('ready');
             setWorker(newWorker);
-            console.log(`增强版Worker初始化完成，耗时 ${initTime.toFixed(2)}ms`);
             break;
-            
-          case 'ERROR':
+          }
+
+          case 'ERROR': {
             setError(`Worker错误: ${e.data.payload.error}`);
             setWorkerStatus('error');
             break;
+          }
+
+          default: {
+            console.warn('Unknown worker message type:', e.data.type);
+            break;
+          }
         }
       };
-      
+
       // Worker错误处理
       const handleWorkerError = (err) => {
         console.error('Worker错误:', err);
         setError(`Worker初始化失败: ${err.message}`);
         setWorkerStatus('error');
       };
-      
+
       newWorker.addEventListener('message', handleWorkerMessage);
       newWorker.addEventListener('error', handleWorkerError);
-      
+
       // 清理函数
       return () => {
         newWorker.removeEventListener('message', handleWorkerMessage);
         newWorker.removeEventListener('error', handleWorkerError);
         newWorker.terminate();
       };
-      
     } catch (err) {
       console.error('创建增强版Worker失败:', err);
       setError(`创建增强版Worker失败: ${err.message}`);
@@ -107,7 +114,7 @@ function EnhancedApp() {
   useEffect(() => {
     // 初始化GitHub Pages路由适配
     initGitHubPagesRouter();
-    
+
     const cleanup = initEnhancedWorker();
     return cleanup;
   }, []);
@@ -122,15 +129,11 @@ function EnhancedApp() {
             <Title level={4} style={{ marginTop: 20 }}>
               正在初始化增强版大数据表格...
             </Title>
-            <Paragraph type="secondary">
-              正在生成10万行数据并启动增强版Web Worker
-            </Paragraph>
-            <Paragraph type="secondary">
-              支持: 数据筛选、多列排序、数据导出等高级功能
-            </Paragraph>
+            <Paragraph type="secondary">正在生成10万行数据并启动增强版Web Worker</Paragraph>
+            <Paragraph type="secondary">支持: 数据筛选、多列排序、数据导出等高级功能</Paragraph>
           </div>
         );
-        
+
       case 'error':
         return (
           <div style={{ padding: '20px' }}>
@@ -150,24 +153,19 @@ function EnhancedApp() {
             />
           </div>
         );
-        
+
       case 'ready':
         return (
           <div>
-            <Tabs 
-              activeKey={activeTab} 
-              onChange={setActiveTab}
-              type="card"
-              size="large"
-            >
-              <TabPane 
+            <Tabs activeKey={activeTab} onChange={setActiveTab} type="card" size="large">
+              <TabPane
                 tab={
                   <span>
                     <ExperimentOutlined />
                     增强版表格
                     <Badge count="New" style={{ marginLeft: 8 }} />
                   </span>
-                } 
+                }
                 key="enhanced"
               >
                 <EnhancedBigDataTable worker={worker} />
@@ -175,7 +173,7 @@ function EnhancedApp() {
             </Tabs>
           </div>
         );
-        
+
       default:
         return null;
     }
@@ -192,22 +190,30 @@ function EnhancedApp() {
               超大数据表格演示 - 增强版
             </Title>
             <Paragraph>
-              使用 <Text code>React 18</Text> + <Text code>Ant Design</Text> + <Text code>Web Worker</Text> + <Text code>虚拟滚动</Text> 实现
+              使用 <Text code>React 18</Text> + <Text code>Ant Design</Text> +{' '}
+              <Text code>Web Worker</Text> + <Text code>虚拟滚动</Text> 实现
             </Paragraph>
             <Paragraph type="secondary">
-              演示10万行 × 10列（100万单元格）数据的流畅滚动和高级数据操作，所有大数据操作都在Web Worker中执行，确保主线程不阻塞。
+              演示10万行 × 10列（100万单元格）数据的流畅滚动和高级数据操作，所有大数据操作都在Web
+              Worker中执行，确保主线程不阻塞。
             </Paragraph>
-            
+
             {/* 功能特性标签 */}
             <Space wrap style={{ marginTop: 12 }}>
-              <Tag color="blue" icon={<FilterOutlined />}>数据筛选</Tag>
-              <Tag color="green" icon={<SortAscendingOutlined />}>多列排序</Tag>
-              <Tag color="orange" icon={<ExportOutlined />}>数据导出</Tag>
+              <Tag color="blue" icon={<FilterOutlined />}>
+                数据筛选
+              </Tag>
+              <Tag color="green" icon={<SortAscendingOutlined />}>
+                多列排序
+              </Tag>
+              <Tag color="orange" icon={<ExportOutlined />}>
+                数据导出
+              </Tag>
               <Tag color="purple">虚拟滚动</Tag>
               <Tag color="red">Web Worker</Tag>
             </Space>
           </div>
-          
+
           {performanceInfo && (
             <Card size="small" style={{ minWidth: 320 }}>
               <Title level={5} style={{ marginBottom: 12 }}>
@@ -229,17 +235,26 @@ function EnhancedApp() {
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                   <Text type="secondary">当前状态:</Text>
-                  <Text type="success" strong>就绪</Text>
+                  <Text type="success" strong>
+                    就绪
+                  </Text>
                 </div>
               </div>
             </Card>
           )}
         </div>
-        
+
         {/* 功能特性 */}
         <div style={{ marginTop: 24 }}>
           <Title level={5}>增强版核心特性</Title>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16, marginTop: 12 }}>
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+              gap: 16,
+              marginTop: 12,
+            }}
+          >
             <Card key="feature-1" size="small">
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                 <FilterOutlined style={{ color: '#1890ff' }} />
@@ -249,7 +264,7 @@ function EnhancedApp() {
                 支持等于、不等于、大于、小于、包含等多种筛选条件，实时过滤10万行数据
               </Paragraph>
             </Card>
-            
+
             <Card key="feature-2" size="small">
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                 <SortAscendingOutlined style={{ color: '#52c41a' }} />
@@ -259,7 +274,7 @@ function EnhancedApp() {
                 支持多列优先级排序，可配置任意数量的排序列和排序方向
               </Paragraph>
             </Card>
-            
+
             <Card key="feature-3" size="small">
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                 <ExportOutlined style={{ color: '#fa8c16' }} />
@@ -269,7 +284,7 @@ function EnhancedApp() {
                 支持CSV和JSON格式导出，可选择导出全部、可视区域或选定行数据
               </Paragraph>
             </Card>
-            
+
             <Card key="feature-4" size="small">
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                 <SyncOutlined style={{ color: '#722ed1' }} />
@@ -282,18 +297,18 @@ function EnhancedApp() {
           </div>
         </div>
       </Card>
-      
+
       {/* 操作按钮 */}
       <div style={{ marginBottom: 16, display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-        <Button 
+        <Button
           onClick={restartWorker}
           icon={<SyncOutlined />}
           disabled={workerStatus === 'initializing'}
         >
           重启Worker
         </Button>
-        
-        <Button 
+
+        <Button
           type="primary"
           onClick={() => {
             if (workerRef.current) {
@@ -304,14 +319,21 @@ function EnhancedApp() {
           检查状态
         </Button>
       </div>
-      
+
       {/* 主内容 */}
       {renderContent()}
-      
+
       {/* 使用说明 */}
       <Card style={{ marginTop: 24 }}>
         <Title level={5}>增强版使用说明</Title>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 24, marginTop: 16 }}>
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+            gap: 24,
+            marginTop: 16,
+          }}
+        >
           <div>
             <Title level={6}>🎯 数据筛选</Title>
             <ol style={{ marginTop: 8, paddingLeft: 20 }}>
@@ -321,7 +343,7 @@ function EnhancedApp() {
               <li>使用"清除筛选"按钮恢复原始数据</li>
             </ol>
           </div>
-          
+
           <div>
             <Title level={6}>📊 多列排序</Title>
             <ol style={{ marginTop: 8, paddingLeft: 20 }}>
@@ -331,7 +353,7 @@ function EnhancedApp() {
               <li>点击"应用排序"执行多列排序</li>
             </ol>
           </div>
-          
+
           <div>
             <Title level={6}>💾 数据导出</Title>
             <ol style={{ marginTop: 8, paddingLeft: 20 }}>
@@ -342,10 +364,19 @@ function EnhancedApp() {
             </ol>
           </div>
         </div>
-        
-        <div style={{ marginTop: 24, padding: 12, background: '#f6ffed', border: '1px solid #b7eb8f', borderRadius: 6 }}>
+
+        <div
+          style={{
+            marginTop: 24,
+            padding: 12,
+            background: '#f6ffed',
+            border: '1px solid #b7eb8f',
+            borderRadius: 6,
+          }}
+        >
           <Text type="success">
-            💡 提示: 所有高级功能都在Web Worker中执行，不会阻塞主线程。打开浏览器开发者工具，查看Console中的Worker日志，了解性能表现。
+            💡 提示: 所有高级功能都在Web
+            Worker中执行，不会阻塞主线程。打开浏览器开发者工具，查看Console中的Worker日志，了解性能表现。
           </Text>
         </div>
       </Card>

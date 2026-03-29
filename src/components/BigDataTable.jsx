@@ -1,11 +1,8 @@
-import React, { useState, useEffect, useRef, useCallback } from "react";
-import { FixedSizeList as List } from "react-window";
-import { Button, Spin, Alert, Tooltip } from "antd";
-import {
-  SortAscendingOutlined,
-  SortDescendingOutlined,
-  ReloadOutlined,
-} from "@ant-design/icons";
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+
+import { SortAscendingOutlined, SortDescendingOutlined, ReloadOutlined } from '@ant-design/icons';
+import { Button, Spin, Alert, Tooltip } from 'antd';
+import { FixedSizeList as List } from 'react-window';
 
 const BigDataTable = ({ worker }) => {
   // 状态
@@ -19,11 +16,11 @@ const BigDataTable = ({ worker }) => {
   });
   const [status, setStatus] = useState({
     totalRows: 0,
-    visibleRange: "0-0",
+    visibleRange: '0-0',
     columnNames: [],
     columnKeys: [],
   });
-  const [error, setError] = useState(null);
+  const [, setError] = useState(null);
 
   // 引用 —— 解决闭包陷阱
   const listRef = useRef(null);
@@ -56,7 +53,7 @@ const BigDataTable = ({ worker }) => {
     return () => {
       isMounted.current = false;
       pendingRequests.current.forEach((handler) => {
-        worker?.removeEventListener("message", handler);
+        worker?.removeEventListener('message', handler);
       });
       pendingRequests.current.clear();
     };
@@ -65,16 +62,16 @@ const BigDataTable = ({ worker }) => {
   // 发送到 Worker
   const sendToWorker = useCallback(
     (type, payload) => {
-      if (!worker) return Promise.reject(new Error("Worker 未就绪"));
+      if (!worker) return Promise.reject(new Error('Worker 未就绪'));
 
       return new Promise((resolve, reject) => {
         const requestId = ++requestIdRef.current;
         const handler = (e) => {
           if (e.data.requestId === requestId) {
-            worker.removeEventListener("message", handler);
+            worker.removeEventListener('message', handler);
             pendingRequests.current.delete(requestId);
 
-            if (e.data.type === "ERROR") {
+            if (e.data.type === 'ERROR') {
               reject(new Error(e.data.payload.error));
             } else {
               resolve(e.data.payload);
@@ -82,20 +79,20 @@ const BigDataTable = ({ worker }) => {
           }
         };
 
-        worker.addEventListener("message", handler);
+        worker.addEventListener('message', handler);
         pendingRequests.current.set(requestId, handler);
         worker.postMessage({ type, payload, requestId });
 
         setTimeout(() => {
           if (pendingRequests.current.has(requestId)) {
-            worker.removeEventListener("message", handler);
+            worker.removeEventListener('message', handler);
             pendingRequests.current.delete(requestId);
-            reject(new Error("请求超时"));
+            reject(new Error('请求超时'));
           }
         }, 8000);
       });
     },
-    [worker],
+    [worker]
   );
 
   // ✅ 终极修复：无闭包、无状态锁死
@@ -110,10 +107,7 @@ const BigDataTable = ({ worker }) => {
 
       // 计算加载范围
       const start = Math.max(0, targetStart - BUFFER_ROWS);
-      const end = Math.min(
-        start + VISIBLE_ROWS + BUFFER_ROWS * 2,
-        status.totalRows,
-      );
+      const end = Math.min(start + VISIBLE_ROWS + BUFFER_ROWS * 2, status.totalRows);
 
       // 防重复请求 - 更智能的检查
       // 只有当请求的起始位置在当前缓存范围内时才跳过
@@ -125,7 +119,7 @@ const BigDataTable = ({ worker }) => {
 
       try {
         setLoading(true);
-        const res = await sendToWorker("GET_SLICE", {
+        const res = await sendToWorker('GET_SLICE', {
           startIndex: start,
           count: end - start,
         });
@@ -141,14 +135,14 @@ const BigDataTable = ({ worker }) => {
         const e = res.startIndex + res.data.length;
         setStatus((prev) => ({ ...prev, visibleRange: `${s}-${e}` }));
       } catch (err) {
-        console.error("加载失败", err);
+        console.error('加载失败', err);
       } finally {
         setLoading(false);
       }
 
       // ✅ 依赖最小化，永不闭包
     },
-    [worker, sorting, status.totalRows, sendToWorker],
+    [worker, sorting, status.totalRows, sendToWorker]
   );
 
   // 滚动触发
@@ -157,7 +151,7 @@ const BigDataTable = ({ worker }) => {
       const currentStartRow = Math.floor(scrollOffset / ROW_HEIGHT);
       loadVisibleData(currentStartRow);
     },
-    [loadVisibleData],
+    [loadVisibleData]
   );
 
   // 排序
@@ -167,21 +161,19 @@ const BigDataTable = ({ worker }) => {
       try {
         setSorting(true);
         const dir =
-          currentSort.column === colIdx && currentSort.direction === "asc"
-            ? "desc"
-            : "asc";
-        await sendToWorker("SORT", { columnIndex: colIdx, direction: dir });
+          currentSort.column === colIdx && currentSort.direction === 'asc' ? 'desc' : 'asc';
+        await sendToWorker('SORT', { columnIndex: colIdx, direction: dir });
         setCurrentSort({ column: colIdx, direction: dir });
 
         listRef.current?.scrollTo(0);
         await loadVisibleData(0);
       } catch (err) {
-        console.error("排序失败", err);
+        console.error('排序失败', err);
       } finally {
         setSorting(false);
       }
     },
-    [worker, sorting, currentSort, sendToWorker, loadVisibleData],
+    [worker, sorting, currentSort, sendToWorker, loadVisibleData]
   );
 
   // 重置排序
@@ -189,12 +181,12 @@ const BigDataTable = ({ worker }) => {
     if (!worker || sorting) return;
     try {
       setSorting(true);
-      await sendToWorker("RESET_SORT");
+      await sendToWorker('RESET_SORT');
       setCurrentSort({ column: null, direction: null });
       listRef.current?.scrollTo(0);
       await loadVisibleData(0);
     } catch (err) {
-      console.error("重置失败", err);
+      console.error('重置失败', err);
     } finally {
       setSorting(false);
     }
@@ -204,7 +196,7 @@ const BigDataTable = ({ worker }) => {
   const fetchStatus = useCallback(async () => {
     if (!worker) return;
     try {
-      const res = await sendToWorker("GET_STATUS");
+      const res = await sendToWorker('GET_STATUS');
       setStatus((prev) => ({
         ...prev,
         totalRows: res.totalRows,
@@ -212,7 +204,7 @@ const BigDataTable = ({ worker }) => {
         columnKeys: res.columnKeys,
       }));
     } catch (err) {
-      console.error("获取状态失败", err);
+      console.error('获取状态失败', err);
     }
   }, [worker, sendToWorker]);
 
@@ -242,13 +234,13 @@ const BigDataTable = ({ worker }) => {
                 key={i}
                 className="table-cell"
                 style={{
-                  width: i === 0 ? "80px" : "120px",
+                  width: i === 0 ? '80px' : '120px',
                   flexShrink: 0,
-                  padding: "0 12px",
-                  lineHeight: "54px",
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                  whiteSpace: "nowrap",
+                  padding: '0 12px',
+                  lineHeight: '54px',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
                 }}
               >
                 {row[k]}
@@ -260,16 +252,13 @@ const BigDataTable = ({ worker }) => {
 
       return (
         <div className="table-row" style={style}>
-          <div
-            className="table-cell"
-            style={{ width: "100%", textAlign: "center", color: "#aaa" }}
-          >
+          <div className="table-cell" style={{ width: '100%', textAlign: 'center', color: '#aaa' }}>
             加载中…
           </div>
         </div>
       );
     },
-    [status.columnKeys],
+    [status.columnKeys]
   );
 
   // 表头
@@ -279,10 +268,10 @@ const BigDataTable = ({ worker }) => {
       <div
         className="table-header"
         style={{
-          display: "flex",
+          display: 'flex',
           height: ROW_HEIGHT,
-          background: "#fafafa",
-          borderBottom: "1px solid #e8e8e8",
+          background: '#fafafa',
+          borderBottom: '1px solid #e8e8e8',
         }}
       >
         {names.map((name, i) => (
@@ -291,22 +280,22 @@ const BigDataTable = ({ worker }) => {
             className="table-cell"
             onClick={() => handleSort(i)}
             style={{
-              width: i === 0 ? "80px" : "120px",
+              width: i === 0 ? '80px' : '120px',
               flexShrink: 0,
-              padding: "0 12px",
-              lineHeight: "54px",
+              padding: '0 12px',
+              lineHeight: '54px',
               fontWeight: 500,
-              cursor: "pointer",
-              userSelect: "none",
+              cursor: 'pointer',
+              userSelect: 'none',
             }}
           >
-            <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
               <span>{name}</span>
               {currentSort.column === i &&
-                (currentSort.direction === "asc" ? (
-                  <SortAscendingOutlined style={{ color: "#1890ff" }} />
+                (currentSort.direction === 'asc' ? (
+                  <SortAscendingOutlined style={{ color: '#1890ff' }} />
                 ) : (
-                  <SortDescendingOutlined style={{ color: "#1890ff" }} />
+                  <SortDescendingOutlined style={{ color: '#1890ff' }} />
                 ))}
             </div>
           </div>
@@ -315,22 +304,20 @@ const BigDataTable = ({ worker }) => {
     );
   }, [status.columnNames, currentSort, handleSort]);
 
-  if (error) {
-    return <Alert message="出错了" description={error} type="error" />;
-  }
+  // 错误处理（如果有错误状态的话）
+  // if (error) {
+  //   return <Alert message="出错了" description={error} type="error" />;
+  // }
 
   return (
-    <div
-      className="table-container"
-      style={{ width: "100%", position: "relative" }}
-    >
+    <div className="table-container" style={{ width: '100%', position: 'relative' }}>
       <div
         style={{
           marginBottom: 12,
-          display: "flex",
+          display: 'flex',
           gap: 16,
-          flexWrap: "wrap",
-          alignItems: "center",
+          flexWrap: 'wrap',
+          alignItems: 'center',
         }}
       >
         <div>总行：{status.totalRows.toLocaleString()}</div>
@@ -338,8 +325,8 @@ const BigDataTable = ({ worker }) => {
         <div>
           排序：
           {currentSort.column
-            ? `${status.columnNames[currentSort.column]} ${currentSort.direction === "asc" ? "↑" : "↓"}`
-            : "未排序"}
+            ? `${status.columnNames[currentSort.column]} ${currentSort.direction === 'asc' ? '↑' : '↓'}`
+            : '未排序'}
           {currentSort.column && (
             <Tooltip title="重置排序">
               <Button
@@ -354,20 +341,20 @@ const BigDataTable = ({ worker }) => {
         </div>
       </div>
 
-      <div style={{ position: "relative" }}>
+      <div style={{ position: 'relative' }}>
         {(loading || sorting) && (
           <div
             style={{
-              position: "absolute",
+              position: 'absolute',
               inset: 0,
-              background: "rgba(255,255,255,0.7)",
+              background: 'rgba(255,255,255,0.7)',
               zIndex: 10,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
             }}
           >
-            <Spin tip={sorting ? "排序中..." : "加载中..."} />
+            <Spin tip={sorting ? '排序中...' : '加载中...'} />
           </div>
         )}
 

@@ -31,7 +31,7 @@ export function getRouterBasename() {
 export function navigateTo(path) {
   const base = getBasePath();
   const fullPath = `${base}${path.startsWith('/') ? path.slice(1) : path}`;
-  
+
   if (process.env.NODE_ENV === 'production') {
     // 生产环境使用完整的 URL
     window.location.href = fullPath;
@@ -39,7 +39,7 @@ export function navigateTo(path) {
     // 开发环境使用 history API
     window.history.pushState({}, '', fullPath);
   }
-  
+
   return fullPath;
 }
 
@@ -64,12 +64,12 @@ export function initGitHubPagesRouter() {
   const handleInitialRoute = () => {
     const { pathname } = window.location;
     const base = getBasePath();
-    
+
     // 如果访问的是根路径，重定向到带 base 的路径
     if (pathname === '/' || pathname === '/bigTableRender') {
       window.history.replaceState({}, '', base);
     }
-    
+
     // 处理 404 页面的重定向
     if (pathname.includes('404.html')) {
       const hash = window.location.hash || '';
