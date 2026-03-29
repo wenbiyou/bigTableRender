@@ -32,6 +32,8 @@ const COLUMN_KEYS = [
 let allData = null;
 let sortedData = null;
 let currentSort = { column: null, direction: null }; // null | 'asc' | 'desc'
+let currentFilter = null; // { column: null, operator: null, value: null }
+let filteredData = null;
 
 /**
  * 生成10万行数据

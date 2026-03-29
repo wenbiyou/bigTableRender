@@ -296,6 +296,10 @@ const CONFIG = {
 };
 ```
 
+### 访问部署的应用
+- 主页面: https://wenbiyou.github.io/bigTableRender/
+- 备用地址: https://wenbiyou.github.io/bigTableRender/index.html
+
 ## 🔍 故障排除
 
 ### 常见问题
@@ -400,32 +404,6 @@ exportToCSV(rows) {
 }
 ```
 
-### 架构扩展
-
-#### 微前端集成
-
-```javascript
-// 作为微前端子应用
-export const BigTableApp = {
-  bootstrap: () => Promise.resolve(),
-  mount: (container) => ReactDOM.render(<App />, container),
-  unmount: () => ReactDOM.unmountComponentAtNode(container),
-};
-```
-
-#### 服务端渲染支持
-
-```javascript
-// SSR兼容性适配
-if (typeof window !== 'undefined') {
-  // 客户端代码
-  const worker = new Worker(...);
-} else {
-  // 服务端代码
-  const mockWorker = { postMessage: () => {} };
-}
-```
-
 ## 📄 许可证
 
 本项目采用 [MIT License](LICENSE) 开源协议。
@@ -448,13 +426,6 @@ if (typeof window !== 'undefined') {
 - 遵循React Hooks最佳实践
 - 添加必要的单元测试
 - 更新相关文档
-
-## 📞 支持与联系
-
-### 问题反馈
-
-- [GitHub Issues](https://github.com/your-username/bigTableRender/issues)
-- 邮件支持: support@example.com
 
 ---
 

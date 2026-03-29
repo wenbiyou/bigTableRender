@@ -115,8 +115,12 @@ const BigDataTable = ({ worker }) => {
         status.totalRows,
       );
 
-      // 防重复请求
-      if (lastLoadStartRef.current === start) return;
+      // 防重复请求 - 更智能的检查
+      // 只有当请求的起始位置在当前缓存范围内时才跳过
+      const currentEnd = currentStart + currentDataLength;
+      if (start >= currentStart && start < currentEnd && lastLoadStartRef.current === start) {
+        return;
+      }
       lastLoadStartRef.current = start;
 
       try {
