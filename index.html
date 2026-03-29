@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>10万行大数据表格演示 | React + Web Worker + 虚拟滚动</title>
+    <meta name="description" content="使用React 18 + Ant Design + Web Worker + 虚拟滚动实现的10万行×10列大数据表格演示">
+    <style>
+      /* 加载动画 */
+      #loading {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        color: white;
+        z-index: 9999;
+        transition: opacity 0.3s ease-out;
+      }
+      
+      .loading-spinner {
+        width: 50px;
+        height: 50px;
+        border: 3px solid rgba(255, 255, 255, 0.3);
+        border-radius: 50%;
+        border-top-color: white;
+        animation: spin 1s ease-in-out infinite;
+        margin-bottom: 20px;
+      }
+      
+      @keyframes spin {
+        to { transform: rotate(360deg); }
+      }
+      
+      .loading-text {
+        font-size: 18px;
+        font-weight: 500;
+        margin-bottom: 10px;
+      }
+      
+      .loading-subtext {
+        font-size: 14px;
+        opacity: 0.8;
+        text-align: center;
+        max-width: 400px;
+        line-height: 1.5;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- 加载动画 -->
+    <div id="loading">
+      <div class="loading-spinner"></div>
+      <div class="loading-text">正在加载大数据表格演示...</div>
+      <div class="loading-subtext">
+        正在初始化10万行数据，请稍候<br>
+        <small>数据规模: 100,000行 × 10列 = 1,000,000个单元格</small>
+      </div>
+    </div>
+    
+    <!-- 应用根节点 -->
+    <div id="root"></div>
+    
+    <!-- Vite入口文件 -->
+    <script type="module" src="/src/main.jsx"></script>
+    
+    <script type="module">
+      // 隐藏加载动画
+      window.addEventListener('load', () => {
+        setTimeout(() => {
+          const loading = document.getElementById('loading');
+          if (loading) {
+            loading.style.opacity = '0';
+            setTimeout(() => {
+              loading.style.display = 'none';
+            }, 300);
+          }
+        }, 500);
+      });
+    </script>
+  </body>
+</html>
