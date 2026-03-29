@@ -456,15 +456,6 @@ if (typeof window !== 'undefined') {
 - [GitHub Issues](https://github.com/your-username/bigTableRender/issues)
 - 邮件支持: support@example.com
 
-### 技术讨论
-
-- [Discord社区](https://discord.gg/your-invite)
-- [技术博客](https://blog.example.com)
-
-### 商业合作
-
-如需企业级定制开发或技术支持，请联系: business@example.com
-
 ---
 
 ## 🎓 学习资源

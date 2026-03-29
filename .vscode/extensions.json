@@ -1,0 +1,63 @@
+{
+  "recommendations": [
+    // ========== 核心开发工具 ==========
+    "dbaeumer.vscode-eslint",
+    "esbenp.prettier-vscode",
+    
+    // ========== React 开发 ==========
+    "dsznajder.es7-react-js-snippets",
+    "msjsdiag.vscode-react-native",
+    
+    // ========== TypeScript 开发 ==========
+    "ms-vscode.vscode-typescript-next",
+    
+    // ========== Git 工具 ==========
+    "eamodio.gitlens",
+    "mhutchie.git-graph",
+    
+    // ========== 代码质量 ==========
+    "streetsidesoftware.code-spell-checker",
+    "wix.vscode-import-cost",
+    "kisstkondoros.vscode-gutter-preview",
+    
+    // ========== 测试工具 ==========
+    "orta.vscode-jest",
+    "firsttris.vscode-jest-runner",
+    
+    // ========== 调试工具 ==========
+    "ms-vscode.vscode-js-profile-flame",
+    
+    // ========== 主题和图标 ==========
+    "pkief.material-icon-theme",
+    "akamud.vscode-theme-onedark",
+    
+    // ========== 生产力工具 ==========
+    "christian-kohler.path-intellisense",
+    "christian-kohler.npm-intellisense",
+    "visualstudioexptteam.vscodeintellicode",
+    "formulahendry.auto-rename-tag",
+    "formulahendry.auto-close-tag",
+    "aaron-bond.better-comments",
+    "usernamehw.errorlens",
+    
+    // ========== 文档工具 ==========
+    "yzhang.markdown-all-in-one",
+    "shd101wyy.markdown-preview-enhanced",
+    
+    // ========== 终端工具 ==========
+    "ms-vscode.powershell",
+    
+    // ========== 数据库工具 ==========
+    "mtxr.sqltools",
+    
+    // ========== Docker 工具 ==========
+    "ms-azuretools.vscode-docker",
+    
+    // ========== API 工具 ==========
+    "rangav.vscode-thunder-client",
+    
+    // ========== 性能工具 ==========
+    "ms-vscode.vscode-js-profile-table"
+  ],
+  "unwantedRecommendations": []
+}

@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Redirecting...</title>
+    <script>
+        // GitHub Pages 404 页面重定向
+        const path = window.location.pathname;
+        const repoName = 'bigTableRender';
+        
+        // 如果是 GitHub Pages 的 404 页面，重定向到首页
+        if (path.includes('/' + repoName + '/')) {
+            const appPath = path.split('/' + repoName + '/')[1] || '';
+            window.location.href = '/' + repoName + '/#' + appPath;
+        } else {
+            // 直接访问根路径
+            window.location.href = '/bigTableRender/';
+        }
+    </script>
+</head>
+<body>
+    <noscript>
+        <h1>Page Not Found</h1>
+        <p>This is a single-page application. Please enable JavaScript or navigate to the <a href="/bigTableRender/">homepage</a>.</p>
+    </noscript>
+</body>
+</html>

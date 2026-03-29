@@ -11,5 +11,20 @@ export default defineConfig({
   // 确保Worker正确加载
   worker: {
     format: 'es'
+  },
+  // GitHub Pages 配置
+  base: process.env.NODE_ENV === 'production' ? '/bigTableRender/' : '/',
+  build: {
+    outDir: 'dist',
+    sourcemap: false,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ['react', 'react-dom'],
+          antd: ['antd'],
+          reactWindow: ['react-window']
+        }
+      }
+    }
   }
 })

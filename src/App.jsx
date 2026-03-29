@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Card, Typography, Alert, Spin, Button, Space } from 'antd';
 import { DatabaseOutlined, RocketOutlined, SyncOutlined } from '@ant-design/icons';
 import BigDataTable from './components/BigDataTable.jsx';
+import { initGitHubPagesRouter } from './utils/gh-pages-router';
 
 const { Title, Paragraph, Text } = Typography;
 
@@ -91,8 +92,11 @@ function App() {
     initWorker();
   };
 
-  // 初始化Worker
+  // 初始化GitHub Pages路由和Worker
   useEffect(() => {
+    // 初始化GitHub Pages路由适配
+    initGitHubPagesRouter();
+    
     const cleanup = initWorker();
     return cleanup;
   }, []);
