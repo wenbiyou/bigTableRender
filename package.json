@@ -75,11 +75,11 @@
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
-      "prettier --write",
+      "prettier --write --ignore-path .prettierignore",
       "eslint --fix --max-warnings 0"
     ],
     "*.{json,md,html,css,scss,less,yaml,yml}": [
-      "prettier --write"
+      "prettier --write --ignore-path .prettierignore"
     ]
   },
   "engines": {

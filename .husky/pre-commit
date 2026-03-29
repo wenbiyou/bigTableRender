@@ -1,16 +1,15 @@
 #!/usr/bin/env sh
 . "$(dirname -- "$0")/_/husky.sh"
 
-echo "🚀 运行 pre-commit 钩子..."
+echo "🚀 Running pre-commit hooks..."
 
-# 1. 运行 lint-staged（自动格式化 + ESLint 检查）
-echo "📝 运行 lint-staged (Prettier + ESLint)..."
+# Run lint-staged for staged files
 npx lint-staged
 
-# 2. 检查是否有未暂存的更改
-if git diff --name-only | grep -q .; then
-  echo "⚠️  检测到未暂存的更改，请重新提交"
+# Check for unstaged changes after formatting
+if ! git diff --quiet; then
+  echo "⚠️  Code was auto-formatted. Please review and stage changes."
   exit 1
 fi
 
-echo "✅ pre-commit 检查通过！"
+echo "✅ Pre-commit checks passed!"
